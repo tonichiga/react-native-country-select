@@ -485,5 +485,6 @@ Thank you for considering contributing to **react-native-country-select**!
 <div align = "center">
 	<br>
 	  Thanks for stopping by! 😁
+		Fork original package.
 	<br>
 </div>
