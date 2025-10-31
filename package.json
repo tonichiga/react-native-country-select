@@ -43,6 +43,7 @@
   "devDependencies": {},
   "peerDependencies": {
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "expo-haptics": "*"
   }
 }

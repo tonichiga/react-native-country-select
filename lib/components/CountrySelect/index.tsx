@@ -1,40 +1,42 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useCallback, useMemo, useState, useRef } from 'react';
-import { View, FlatList, ListRenderItem, Text } from 'react-native';
+import React, { useCallback, useMemo, useState, useRef } from "react";
+import { View, FlatList, ListRenderItem, Text } from "react-native";
 
-import { PopupModal } from '../PopupModal';
-import { CountryItem } from '../CountryItem';
-import { CloseButton } from '../CloseButton';
-import { SearchInput } from '../SearchInput';
-import { FullscreenModal } from '../FullscreenModal';
-import { BottomSheetModal } from '../BottomSheetModal';
-import { AlphabeticFilter } from '../AlphabeticFilter';
+import { PopupModal } from "../PopupModal";
+import { CountryItem } from "../CountryItem";
+import { CloseButton } from "../CloseButton";
+import { SearchInput } from "../SearchInput";
+import { FullscreenModal } from "../FullscreenModal";
+import { BottomSheetModal } from "../BottomSheetModal";
+import { AlphabeticFilter } from "../AlphabeticFilter";
 
-import { createStyles } from '../styles';
-import { translations } from '../../utils/getTranslation';
-import { getCountriesList } from '../../utils/getCountriesList';
+import { createStyles } from "../styles";
+import { translations } from "../../utils/getTranslation";
+import { getCountriesList } from "../../utils/getCountriesList";
 import {
   ICountry,
   ICountrySelectProps,
   ICountrySelectLanguages,
   IListItem,
   IThemeProps,
-} from '../../interface';
+} from "../../interface";
+
+import * as Haptics from "expo-haptics";
 
 export const CountrySelect: React.FC<ICountrySelectProps> = ({
   visible,
   onClose,
   onSelect,
-  modalType = 'bottomSheet',
-  theme = 'light',
+  modalType = "bottomSheet",
+  theme = "light",
   isMultiSelect = false,
   isFullScreen = false,
   countrySelectStyle,
   popularCountries = [],
   visibleCountries = [],
   hiddenCountries = [],
-  language = 'eng',
+  language = "eng",
   showSearchInput = true,
   showAlphabetFilter = false,
   searchPlaceholder,
@@ -72,7 +74,7 @@ export const CountrySelect: React.FC<ICountrySelectProps> = ({
   allowFontScaling = true,
   ...props
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
 
   const flatListRef = useRef<FlatList<IListItem>>(null);
@@ -80,7 +82,7 @@ export const CountrySelect: React.FC<ICountrySelectProps> = ({
 
   const styles = createStyles(theme, modalType, isFullScreen);
   const selectedCountries =
-    isMultiSelect && 'selectedCountries' in props
+    isMultiSelect && "selectedCountries" in props
       ? props.selectedCountries ?? []
       : [];
 
@@ -105,7 +107,7 @@ export const CountrySelect: React.FC<ICountrySelectProps> = ({
     // Collect indices of section headers
     const sectionIndices: number[] = [];
     for (let i = 0; i < countriesList.length; i++) {
-      if ('isSection' in countriesList[i]) {
+      if ("isSection" in countriesList[i]) {
         sectionIndices.push(i);
       }
     }
@@ -118,8 +120,8 @@ export const CountrySelect: React.FC<ICountrySelectProps> = ({
   }, [countriesList]);
 
   const keyExtractor = useCallback(
-    (item: IListItem) => ('isSection' in item ? item.title : item.cca2),
-    [],
+    (item: IListItem) => ("isSection" in item ? item.title : item.cca2),
+    []
   );
 
   const handlePressLetter = useCallback(
@@ -131,8 +133,8 @@ export const CountrySelect: React.FC<ICountrySelectProps> = ({
       let computedLetter: string | null = null;
       for (let i = index; i < countriesList.length; i++) {
         const item = countriesList[i];
-        if (!('isSection' in item)) {
-          const name = (item as ICountry)?.translations[language]?.common || '';
+        if (!("isSection" in item)) {
+          const name = (item as ICountry)?.translations[language]?.common || "";
           if (name) {
             computedLetter = name[0].toUpperCase();
           }
@@ -149,11 +151,11 @@ export const CountrySelect: React.FC<ICountrySelectProps> = ({
         viewPosition: 0,
       });
     },
-    [countriesList, language],
+    [countriesList, language]
   );
 
   const handleCloseModal = () => {
-    setSearchQuery('');
+    setSearchQuery("");
     setActiveLetter(null);
     onClose();
   };
@@ -172,7 +174,7 @@ export const CountrySelect: React.FC<ICountrySelectProps> = ({
 
   const isCountrySelected = useCallback(
     (cca2: string) => selectedCountryCodes.has(cca2),
-    [selectedCountryCodes],
+    [selectedCountryCodes]
   );
 
   const handleSelectCountry = useCallback(
@@ -180,7 +182,7 @@ export const CountrySelect: React.FC<ICountrySelectProps> = ({
       if (isMultiSelect) {
         if (isCountrySelected(country.cca2)) {
           (onSelect as (countries: ICountry[]) => void)(
-            selectedCountries.filter(c => c.cca2 !== country.cca2),
+            selectedCountries.filter((c) => c.cca2 !== country.cca2)
           );
           return;
         }
@@ -194,7 +196,7 @@ export const CountrySelect: React.FC<ICountrySelectProps> = ({
       (onSelect as (country: ICountry) => void)(country);
       onClose();
     },
-    [isMultiSelect, isCountrySelected, selectedCountries],
+    [isMultiSelect, isCountrySelected, selectedCountries]
   );
 
   const renderCloseButton = () => {
@@ -244,16 +246,19 @@ export const CountrySelect: React.FC<ICountrySelectProps> = ({
       for (const v of viewableItems) {
         const it = v.item;
         const idx = v.index ?? -1;
-        if (!('isSection' in it) && idx >= allCountriesStartIndex) {
-          const name = (it as ICountry)?.translations[language]?.common || '';
+        if (!("isSection" in it) && idx >= allCountriesStartIndex) {
+          const name = (it as ICountry)?.translations[language]?.common || "";
           if (name) {
             updated = name[0].toUpperCase();
           }
           break;
         }
       }
+
+      console.log("Change letter :", updated);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       setActiveLetter(updated);
-    },
+    }
   ).current;
 
   const renderFlatList = () => {
@@ -328,7 +333,7 @@ export const CountrySelect: React.FC<ICountrySelectProps> = ({
 
   const renderItem: ListRenderItem<IListItem> = useCallback(
     ({ item, index }) => {
-      if ('isSection' in item) {
+      if ("isSection" in item) {
         if (sectionTitleComponent) {
           return sectionTitleComponent(item);
         }
@@ -375,7 +380,7 @@ export const CountrySelect: React.FC<ICountrySelectProps> = ({
       sectionTitleComponent,
       isMultiSelect,
       isCountrySelected,
-    ],
+    ]
   );
 
   const renderAlphabetFilter = () => {
@@ -414,7 +419,7 @@ export const CountrySelect: React.FC<ICountrySelectProps> = ({
     </>
   );
 
-  if (modalType === 'popup' || isFullScreen) {
+  if (modalType === "popup" || isFullScreen) {
     if (isFullScreen) {
       return (
         <FullscreenModal
